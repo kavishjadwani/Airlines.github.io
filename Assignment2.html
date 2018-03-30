@@ -1,0 +1,146 @@
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                body{
+    margin: 0px;
+    padding: 0px;
+    position: relative;
+    text-align: center;
+    font-family: sans-serif;              
+    }
+            </style>
+        </head>
+    <body>
+        <h1>Enter URL for Airlines List JSON file</h1>
+        <form name ="airlineform" method = "POST" id"ariline">
+            <input type = "text" name ="URL" value="" ><br><br>
+            <input type = "button" name = "submit" value = "Submit Query" onClick = "viewJSON(this.form)"/>
+        </form>
+
+        <script>
+        function viewJSON(what){
+            var URL = what.URL.value;//URL here is the HTML variable and it stores the filename
+            
+if(URL == ""){alert("The file name cannot be blank");} else{
+        function loadJSON(URL) { // this function opens the file whose filename is in URL.This function is with the viewJSON function and it returns the JSONObj from the file whose name was entereed 
+
+    //-----------------------------------------------
+         if(window.XMLHttpRequest)
+               {// code for IE7+, Firefox, Chrome, Opera, Safari
+    xmlhttp=new XMLHttpRequest();
+    } else {// code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP"); }
+
+      //opens the xmlhttp request using HTML protocol  
+            try{
+    xmlhttp.open("GET",URL,false);
+    xmlhttp.send();}
+            catch(err){
+			alert("Please enter a valid fileName and check the same is present in local directory");
+			return;
+            }
+try{
+    jsonObj= JSON.parse(xmlhttp.responseText);}
+            catch(e){
+            if (e instanceof SyntaxError) 
+            alert("Enter a valid json File");
+            return;
+        }
+    return jsonObj;
+        } 
+
+    jsonObj = loadJSON(URL);//the call to function loadJSON returns JSON object and jsonObj holds it 
+      if (window.ActiveXObject) //if IE, simply execute script (due to async prop).
+    { if (jsonObj.parseError.errorCode != 0) {
+    var myErr = jsonObj.parseError;
+    generateError(jsonObj);
+    hWin = window.open("", "Error", "height=300,width=340");
+    hWin.document.write(html_text);
+    }
+
+     else { generateHTML(jsonObj);
+    hWin = window.open("", "Assignment4", "height=1000,width=800");
+    hWin.document.write(html_text); }
+    } 
+           else //else if FF, execute script once JSON object has loaded
+    { jsonObj.onload=generateHTML(jsonObj);
+    hWin = window.open("", "Assignment4", "height=1000,width=800");
+    hWin.document.write(html_text); } hWin.document.close();   }}
+    //-----------------------------------------------
+         //viewJSON() function ends here   
+
+    //----------------------------------------------
+    //Now we generate HTML
+     function generateHTML(jsonObj) {
+      root=jsonObj.DocumentElement;
+        html_text= "<html><head><title>JSON Parse Result</title></head><body>" ;
+        //This is the title for the new page which will open when we click button 
+
+         html_text+= "<table border = '2'>";
+
+    planes=jsonObj.Mainline.Table.Header.Data; // an array of data 
+         html_text += "<tbody>";
+         html_text+= "<tr>"
+         for(i = 0;i<planes.length;i++){
+           
+                 header = planes[i];
+             html_text +="<th>" + header + "</th>"; 
+         }
+         html_text+= "</tr>"
+         planesinfo=jsonObj.Mainline.Table.Row;
+         if(planesinfo==undefined){
+             alert("The  JSON file does not contain airline company entries");
+         }
+         for(i=0;i<planesinfo.length;i++)
+             {
+                 planeNodeList = planesinfo[i];
+                 html_text += "<tr>";
+                 var aircraft_keys = Object.keys(planeNodeList);
+                 for(j=0;j<planes.length;j++){
+                // for(j=0;j<aircraft_keys.length;j++){
+                      html_text+="<td> "
+                     prop = aircraft_keys[j];
+                     if(aircraft_keys[j]!=undefined){
+                     if(aircraft_keys[j]=="Plane")
+    {//handle images separately
+    html_text+="<img src='"+ planeNodeList[prop] +"' width='"+200+"' height='"+200+"'>";
+    }
+                     else if(aircraft_keys[j] =="Hubs"){
+                        // html_text+="<td> "
+                         var hubs = planeNodeList[prop];
+                         hubnames = hubs.Hub;
+                        
+                         if(hubnames!=undefined && hubnames.length!=0){
+                             
+                         html_text+="<ul>";
+                         html_text+= "<li><b>"+ hubnames[0]+"</b></li>"; 
+                         for(k=1;k< hubnames.length;k++){
+                            html_text+= "<li>"+ hubnames[k]+"</li>"; 
+                         }
+                             html_text+= "</ul> ";
+                    
+                     }
+                     }
+                     else if(aircraft_keys[j] =="HomePage"){
+                     html_text+=" <a href ='"+ planeNodeList[prop]+"'>"+planeNodeList[prop] +"</a>";}
+                     else {
+    html_text+= planeNodeList[prop] ;
+    }}
+html_text+= "</td>";
+                 }
+                  html_text+="</tr>";   
+             }
+
+       html_text+="</tbody>";
+    html_text+="</table>";
+    html_text+="</body></html>";   
+
+     }
+        
+            
+        </script>
+        <noscript>
+        </body>
+    </html>
